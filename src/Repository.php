@@ -1,14 +1,14 @@
 <?php
 
-namespace Dashifen\Container;
+namespace Dashifen\Repository;
 
 /**
- * Class Container
- * @package Dashifen\Container
+ * Class Repository
+ * @package Dashifen\Repository
  *
- * The default Container implementation which allows read-only access to all
+ * The default Repository implementation which allows read-only access to all
  * properties by returning an empty array via the getHiddenPropertyNames()
- * method.  As long as your Container isn't hiding anything, you can just
+ * method.  As long as your Repository isn't hiding anything, you can just
  * extend this one.
  */
 class Repository extends AbstractRepository {

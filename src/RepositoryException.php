@@ -1,6 +1,6 @@
 <?php
 
-namespace Dashifen\Container;
+namespace Dashifen\Repository;
 
 use Dashifen\Exception\Exception;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Dashifen\Container;
+namespace Dashifen\Repository;
 
 use ReflectionClass;
 use ReflectionException;
@@ -8,8 +8,8 @@ use ReflectionProperty;
 use JsonSerializable;
 
 /**
- * Class AbstractContainer
- * @package Dashifen\Container
+ * Class AbstractRepository
+ * @package Dashifen\Repository
  */
 abstract class AbstractRepository implements JsonSerializable, RepositoryInterface {
 	/**
@@ -18,7 +18,7 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 	protected $__properties;
 
 	/**
-	 * AbstractContainer constructor.
+	 * AbstractRepository constructor.
 	 *
 	 * If given an associative data array, loops over its values settings
 	 * properties that match indices therein.
