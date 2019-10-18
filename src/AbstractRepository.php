@@ -29,7 +29,7 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 	 */
 	public function __construct(array $data = []) {
 		$this->initializeProperties();
-
+    $defaults = $this->getPropertyDefaults();
 		foreach ($data as $property => $value) {
 
 			// if our $property doesn't exist as-is, we'll try passing it
@@ -53,7 +53,15 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 
 				$setter = "set" . ucfirst($property);
 				if (method_exists($this, $setter)) {
-					$this->{$setter}($value);
+
+				  // if our value would be empty, then we'll use a default for this
+          // property if it exits.  otherwise, we'll simply use the empty
+          // value.  could we have done this without a nested null coalescing
+          // operator within a ternary statement?  sure, but it wouldn't be
+          // nearly as cool.
+
+				  $value = empty($value) ? ($defaults[$property] ?? $value) : $value;
+          $this->{$setter}($value);
 				} else {
 
 					// if we find a property but it doesn't have a setter,
@@ -100,6 +108,32 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 		$hidden = array_merge(["__properties"], $this->getHiddenPropertyNames());
 		$this->__properties = array_diff($properties, $hidden);
 	}
+
+  /**
+   * getPropertyDefaults
+   *
+   * Returns an array mapping property names to their default value
+   *
+   * @return array
+   */
+	final private function getPropertyDefaults (): array {
+	  try {
+
+	    // we should always be able to reflect $this because the class is
+      // already loaded or we wouldn't be here.  but, because we might throw
+      // an exception, we'll wrap ths following return statement in a try/catch
+      // block.
+
+	    return (new ReflectionClass($this))->getDefaultProperties();
+    } catch (ReflectionException $e) {
+
+	    // in the vanishingly unlikely chance that we end up here, we'll just
+      // return an empty array.  no properties will have their value set to
+      // the default, but that's okay.
+
+	    return [];
+    }
+  }
 
 	/**
 	 * getPropertyNames
