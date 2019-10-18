@@ -124,7 +124,8 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
       // an exception, we'll wrap ths following return statement in a try/catch
       // block.
 
-	    return (new ReflectionClass($this))->getDefaultProperties();
+      $defaults = (new ReflectionClass($this))->getDefaultProperties();
+      return array_merge($defaults, $this->getCustomPropertyDefaults());
     } catch (ReflectionException $e) {
 
 	    // in the vanishingly unlikely chance that we end up here, we'll just
@@ -133,6 +134,19 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 
 	    return [];
     }
+  }
+
+  /**
+   * getCustomPropertyDefaults
+   *
+   * Intended as a way to provide for functional defaults (e.g. the current
+   * date), extensions can override this function to return an array of default
+   * values for properties.  that array should be indexed by property names.
+   *
+   * @return array
+   */
+  protected function getCustomPropertyDefaults (): array {
+	  return [];
   }
 
 	/**
