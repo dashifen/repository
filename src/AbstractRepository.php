@@ -32,6 +32,27 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
     $this->initializeProperties();
     $this->setPropertyValues($data);
     $this->setDefaultPropertyValues();
+
+    // now we've made our list of read-only properties, we've set them either
+    // with values from $data or default values, so all that's left is to make
+    // sure that we don't have any empty requirements.
+
+    $emptyRequired = $this->findEmptyRequirements();
+    if (($emptyCount = sizeof($emptyRequired)) > 0) {
+
+      // if we do have empty requirements, we'll want to print a message about
+      // them.  since the findEmptyRequirements() method returns a list of the
+      // ones we need filled in, we'll tailor or message such that it displays
+      // that list for the programmer to work with.
+
+      $noun = $emptyCount === 1 ? "property" : "properties";
+      $list = join(", ", $emptyRequired);
+
+      throw new RepositoryException(
+        "Please be sure to provide values for the following $noun:  $list",
+        RepositoryException::EMPTY_REQUIREMENTS
+      );
+    }
   }
 
   /**
@@ -42,6 +63,7 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    * the __get() method.
    *
    * @return void
+   * @throws RepositoryException
    */
   final private function initializeProperties () {
 
@@ -54,7 +76,74 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
     $properties = $this->getPropertyNames();
     $hidden = array_merge(["__properties"], $this->getHiddenPropertyNames());
     $this->__properties = array_diff($properties, $hidden);
+
+    // the final step is to be sure that we don't have both an optional and
+    // required property of the same name.  required properties are prefixed
+    // with two underscores, so we could have $this->foo and $this->__foo if
+    // we're not careful.  first, we'll remove double underscores from the
+    // start of property names.  then, we remove duplicates.  finally, we see
+    // if we still have the same number of indices in both the altered array
+    // and __properties.
+
+    $mapped = array_map(function (string $property): string {
+      return preg_replace('/^__/', '', $property);
+    }, $this->__properties);
+
+    $unique = array_unique($mapped);
+    if (sizeof($this->__properties) !== sizeof($unique)) {
+      throw new RepositoryException(
+        "Please ensure that you do not have optional and required properties of the same name.",
+        RepositoryException::DUPLICATE_PROPERTIES
+      );
+    }
   }
+
+  /**
+   * getPropertyNames
+   *
+   * Uses a ReflectionClass to initialize an array of the names of public
+   * and protected properties.
+   *
+   * @return array
+   */
+  final private function getPropertyNames (): array {
+
+    // we use the late static binding on our class name so that children
+    // reflect themselves and not this object.  then, we get a list of
+    // their properties such that they're
+
+    try {
+      $reflection = new ReflectionClass(static::class);
+    } catch (ReflectionException $e) {
+
+      // this shouldn't happen since we're reflecting our own object,
+      // but if it ever does, there's nothing we can do but die.
+
+      trigger_error("Unable to reflect self.", E_USER_ERROR);
+      die();
+    }
+
+    $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
+
+    // we don't want an array of ReflectionProperty objects in the calling
+    // scope.  so, we'll use array_map to loop over our list and return
+    // only their names.
+
+    return array_map(function (ReflectionProperty $property) {
+      return $property->getName();
+    }, $properties);
+  }
+
+  /**
+   * getHiddenPropertyNames
+   *
+   * Returns an array of protected properties that shouldn't be returned
+   * by the __get() method or an empty array if the should all have read
+   * access.
+   *
+   * @return array
+   */
+  abstract protected function getHiddenPropertyNames (): array;
 
   /**
    * setPropertyValues
@@ -117,6 +206,28 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
   }
 
   /**
+   * convertFieldToProperty
+   *
+   * Given a string using dashes to separate words in the way HTML likes
+   * it, return a camelCase string like PHP properties like it.
+   *
+   * @param string $field
+   *
+   * @return string
+   */
+  protected function convertFieldToProperty (string $field) {
+    return preg_replace_callback("/-(\w)/", function ($matches) {
+
+      // for any character preceded by a dash, we want to return the
+      // capital version of that letter.  notice that this also removes
+      // the dash since it's included in the match.  thus, event-name
+      // becomes eventName.
+
+      return strtoupper($matches[1]);
+    }, $field);
+  }
+
+  /**
    * setDefaultPropertyValues
    *
    * For any property that has a default value, if it's current value is empty
@@ -154,7 +265,7 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
       // an exception, we'll wrap ths following return statement in a try/catch
       // block.
 
-      $defaults = (new ReflectionClass($this))->getDefaultProperties();
+      $defaults = (new ReflectionClass(static::class))->getDefaultProperties();
       return array_merge($defaults, $this->getCustomPropertyDefaults());
     } catch (ReflectionException $e) {
 
@@ -175,78 +286,49 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    *
    * @return array
    */
-  protected function getCustomPropertyDefaults (): array {
-    return [];
-  }
+  abstract protected function getCustomPropertyDefaults (): array;
 
   /**
-   * getPropertyNames
+   * findEmptyRequirements
    *
-   * Uses a ReflectionClass to initialize an array of the names of public
-   * and protected properties.
+   * Returns an array of empty required properties.
    *
    * @return array
    */
-  final private function getPropertyNames (): array {
+  protected function findEmptyRequirements (): array {
+    $filter = function (string $i) {
 
-    // we use the late static binding on our class name so that children
-    // reflect themselves and not this object.  then, we get a list of
-    // their properties such that they're
+      // we'll want to auto-require any properties that begin with __.  since
+      // we only look within the __properties property for them, we don't have
+      // to worry about skipping that one.
 
-    try {
-      $reflection = new ReflectionClass(static::class);
-    } catch (ReflectionException $e) {
+      return substr($i, 0, 2) === "__";
+    };
 
-      // this shouldn't happen since we're reflecting our own object,
-      // but if it ever does, there's nothing we can do but die.
+    $requiredProperties = array_merge(
+      array_filter($this->__properties, $filter),
+      $this->getRequiredProperties()
+    );
 
-      trigger_error("Unable to reflect self.", E_USER_ERROR);
-      die();
+    $empties = [];
+    foreach ($requiredProperties as $property) {
+      if (empty($this->{$property})) {
+        $empties[] = preg_replace('/^__/', '', $property);
+      }
     }
 
-    $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
-
-    // we don't want an array of ReflectionProperty objects in the calling
-    // scope.  so, we'll use array_map to loop over our list and return
-    // only their names.
-
-    return array_map(function (ReflectionProperty $property) {
-      return $property->getName();
-    }, $properties);
+    return $empties;
   }
 
   /**
-   * getHiddenPropertyNames
+   * getRequiredProperties
    *
-   * Returns an array of protected properties that shouldn't be returned
-   * by the __get() method or an empty array if the should all have read
-   * access.
+   * Returns an array of property names that must be non-empty after
+   * construction.
    *
    * @return array
    */
-  abstract protected function getHiddenPropertyNames (): array;
-
-  /**
-   * convertFieldToProperty
-   *
-   * Given a string using dashes to separate words in the way HTML likes
-   * it, return a camelCase string like PHP properties like it.
-   *
-   * @param string $field
-   *
-   * @return string
-   */
-  protected function convertFieldToProperty (string $field) {
-    return preg_replace_callback("/-(\w)/", function ($matches) {
-
-      // for any character preceded by a dash, we want to return the
-      // capital version of that letter.  notice that this also removes
-      // the dash since it's included in the match.  thus, event-name
-      // becomes eventName.
-
-      return strtoupper($matches[1]);
-    }, $field);
-  }
+  abstract protected function getRequiredProperties (): array;
 
   /**
    * convertPropertyToField
@@ -284,7 +366,16 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    * @throws RepositoryException
    */
   public function __get (string $property) {
-    if (!in_array($property, $this->__properties)) {
+
+    // a property prefixed by two underscores (__) is required.  but, we want
+    // to make it as simple as possible for the calling scope to reference
+    // properties.  thus, we hide the existence of those underscores herein by
+    // testing both property names both with and without them.
+
+    if (
+      !in_array($property, $this->__properties)
+      && !in_array("__$property", $this->__properties)
+    ) {
       throw new RepositoryException("Unknown property: $property.",
         RepositoryException::UNKNOWN_PROPERTY);
     }
@@ -295,9 +386,15 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
     // we'll use it.
 
     $getter = "get" . ucfirst($property);
-    return method_exists(static::class, $getter)
-      ? $this->{$getter}()
-      : $this->{$property};
+    return !method_exists(static::class, $getter)
+
+      // if we're not using the getter, we'll want to return either the
+      // property directly named by $property or the required one which is
+      // named with two underscores and then $property.  we know one of
+      // these must exist because we tested for them above.
+
+      ? ($this->{$property} ?? $this->{"__$property"})
+      : $this->{$getter}();
   }
 
   /**
@@ -311,7 +408,14 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    * @return bool
    */
   public function __isset (string $property) {
-    return in_array($property, $this->__properties);
+
+    // just like the prior method, we want to test for both $property and
+    // $property prefixed by __.  this allows us to internally reference
+    // required properties with __ but makes that naming convention invisible
+    // to the calling scope.
+
+    return in_array($property, $this->__properties)
+      || in_array("__$property", $this->__properties);
   }
 
   /**
