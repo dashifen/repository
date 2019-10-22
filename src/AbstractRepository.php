@@ -238,9 +238,6 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    */
   protected function setDefaultPropertyValues (): void {
     $defaults = $this->getPropertyDefaults();
-
-    echo "<pre>" . print_r($defaults, true) . "</pre>";
-
     foreach ($defaults as $property => $default) {
       if (empty($this->{$property})) {
 
