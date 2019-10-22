@@ -238,6 +238,9 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
    */
   protected function setDefaultPropertyValues (): void {
     $defaults = $this->getPropertyDefaults();
+
+    echo "<pre>" . print_r($defaults, true) . "</pre>";
+
     foreach ($defaults as $property => $default) {
       if (empty($this->{$property})) {
 
@@ -266,7 +269,18 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
       // block.
 
       $defaults = (new ReflectionClass(static::class))->getDefaultProperties();
-      return array_merge($defaults, $this->getCustomPropertyDefaults());
+      $defaults = array_merge($defaults, $this->getCustomPropertyDefaults());
+
+      // finally, we want to make sure that our list of defaults (a) doesn't
+      // include the __properties property and (b) it only includes properties
+      // that are in the __properties array.  we also remove any that don't
+      // have a default value while we're filtering.
+
+      return array_filter($defaults, function ($default, string $property): bool {
+        return strlen($default) !== 0                      // has a default
+          && $property !== "__properties"                  // isn't __properties
+          && in_array($property, $this->__properties);     // is in __properties
+      }, ARRAY_FILTER_USE_BOTH);
     } catch (ReflectionException $e) {
 
       // in the vanishingly unlikely chance that we end up here, we'll just
