@@ -274,9 +274,9 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
       // have a default value while we're filtering.
 
       return array_filter($defaults, function ($default, string $property): bool {
-        return strlen($default) !== 0                      // has a default
-          && $property !== "__properties"                  // isn't __properties
-          && in_array($property, $this->__properties);     // is in __properties
+        return $this->notEmpty($default) !== 0              // has a default
+          && $property !== "__properties"                   // isn't __properties
+          && in_array($property, $this->__properties);      // is in __properties
       }, ARRAY_FILTER_USE_BOTH);
     } catch (ReflectionException $e) {
 
@@ -286,6 +286,26 @@ abstract class AbstractRepository implements JsonSerializable, RepositoryInterfa
 
       return [];
     }
+  }
+
+  /**
+   * notEmpty
+   *
+   * Returns true if the value isn't empty.  This is only necessary because
+   * things that are empty() are valid values (e.g. "0").
+   *
+   * @param $value
+   *
+   * @return bool
+   */
+  private function notEmpty ($value): bool {
+
+    // the PHP manual tells us that a number of values are considered empty
+    // by empty() that we might want to use here.  these are 0, 0.0, "0", and
+    // false.  if our value is one of those, we'll return true.  after that,
+    // we return !empty().
+
+    return in_array($value, [0, 0.0, "0", false]) || !empty($value);
   }
 
   /**
