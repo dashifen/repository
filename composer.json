@@ -17,7 +17,7 @@
   },
   "minimum-stability": "stable",
   "require": {
-    "dashifen/exception": "1.1.*",
+    "dashifen/exception": "^1",
     "ext-json": "*",
     "php": ">=7.3"
   }
