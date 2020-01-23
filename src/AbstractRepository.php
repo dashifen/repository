@@ -352,7 +352,7 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     public function __get (string $property)
     {
-        if (in_array($property, $this->__properties)) {
+        if (!in_array($property, $this->__properties)) {
             throw new RepositoryException("Unknown property: $property.",
                 RepositoryException::UNKNOWN_PROPERTY);
         }
