@@ -487,7 +487,9 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     public function key (): ?string
     {
-        return key($this->__properties);
+        return $this->__properties[
+            key($this->__properties)
+        ];
     }
     
     /**
