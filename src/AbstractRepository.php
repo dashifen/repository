@@ -482,9 +482,10 @@ abstract class AbstractRepository implements RepositoryInterface
      * Return the name of the current property
      *
      * @link  https://php.net/manual/en/iterator.key.php
-     * @return string
+     *
+     * @return string|null
      */
-    public function key (): string
+    public function key (): ?string
     {
         return key($this->__properties);
     }
