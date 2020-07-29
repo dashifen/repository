@@ -13,10 +13,7 @@ use ReflectionException;
  */
 abstract class AbstractRepository implements RepositoryInterface
 {
-    /**
-     * @var array
-     */
-    protected $__properties;
+    protected array $__properties;
     
     /**
      * AbstractRepository constructor.
@@ -102,7 +99,6 @@ abstract class AbstractRepository implements RepositoryInterface
             // if it ever does, there's nothing we can do but die.
             
             trigger_error('Unable to reflect self.', E_USER_ERROR);
-            die();
         }
         
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);

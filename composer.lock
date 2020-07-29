@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d60d30647a7e0622f05524ceb0197068",
+    "content-hash": "29df3825fac208edb6dbbbdd09d9ae33",
     "packages": [
         {
             "name": "dashifen/exception",
@@ -52,8 +52,9 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "ext-json": "*",
-        "php": ">=7.3"
+        "php": ">=7.4",
+        "ext-json": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }
