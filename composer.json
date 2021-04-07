@@ -19,6 +19,7 @@
   "require": {
     "php": ">=7.4",
     "ext-json": "*",
+    "dashifen/case-changing-trait": "^1",
     "dashifen/exception": "^1"
   }
 }
