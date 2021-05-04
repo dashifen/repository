@@ -293,7 +293,7 @@ abstract class AbstractRepository implements RepositoryInterface
   protected function findEmptyRequirements(): array
   {
     foreach ($this->getRequiredProperties() as $property) {
-      if (empty($this->{$property})) {
+      if (!$this->notEmpty($this->{$property})) {
         $empties[] = $property;
       }
     }
