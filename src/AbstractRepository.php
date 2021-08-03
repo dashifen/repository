@@ -265,10 +265,10 @@ abstract class AbstractRepository implements RepositoryInterface
     
     // the PHP manual tells us that a number of values are considered empty
     // by empty() that we might want to use here.  these are 0, 0.0, "0",
-    // and false.  if our value is one of those, we'll return true.  after
+    // false, and [].  if our value is one of those, we'll return true.  after
     // that, we return !empty().
     
-    return in_array($value, [0, 0.0, '0', false]) || !empty($value);
+    return in_array($value, [0, 0.0, '0', false, []]) || !empty($value);
   }
   
   /**
