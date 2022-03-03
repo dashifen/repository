@@ -65,7 +65,7 @@ abstract class AbstractRepository implements RepositoryInterface
    *
    * @return void
    */
-  final private function initializeProperties()
+  private function initializeProperties()
   {
     
     // first, we get a list of our property names.  then, we get a list of
@@ -88,7 +88,7 @@ abstract class AbstractRepository implements RepositoryInterface
    * @return array
    * @noinspection PhpRedundantCatchClauseInspection
    */
-  final private function getPropertyNames(): array
+  private function getPropertyNames(): array
   {
     
     // we use the late static binding on our class name so that children
@@ -216,7 +216,7 @@ abstract class AbstractRepository implements RepositoryInterface
    * @return array
    * @noinspection PhpRedundantCatchClauseInspection
    */
-  final private function getPropertyDefaults(): array
+  private function getPropertyDefaults(): array
   {
     try {
       
