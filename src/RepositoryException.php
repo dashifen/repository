@@ -11,9 +11,9 @@ class RepositoryException extends Exception
   // we expect children to extend this further, we'll let them start at one
   // and use negative one and two here instead.
   
-  public const UNKNOWN_PROPERTY = -1;
-  public const UNKNOWN_SETTER = -2;
-  public const INVALID_VALUE = -3;
+  public const UNKNOWN_PROPERTY     = -1;
+  public const UNKNOWN_SETTER       = -2;
+  public const INVALID_VALUE        = -3;
   public const DUPLICATE_PROPERTIES = -4;
-  public const EMPTY_REQUIREMENTS = -5;
+  public const EMPTY_REQUIREMENTS   = -5;
 }

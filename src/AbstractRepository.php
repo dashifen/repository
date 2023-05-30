@@ -161,12 +161,11 @@ abstract class AbstractRepository implements RepositoryInterface
           $this->{$setter}($value);
         } else {
           
-          // if we find a property but it doesn't have a setter,
-          // we're going to throw an exception.  children can always
-          // modify this behavior if it's a problem.  or, apps can
-          // catch and ignore them.  regardless, it seems worthwhile
-          // to inform someone that they've probably forgotten to
-          // write a method.
+          // if we find a property without a setter, we're going to throw an
+          // exception.  children can always modify this behavior if it's a
+          // problem.  or, apps can catch and ignore them.  regardless, it
+          // seems worthwhile to inform someone that they've probably forgotten
+          // to write a method.
           
           throw new RepositoryException("Setter missing: $setter.",
             RepositoryException::UNKNOWN_SETTER);
@@ -201,7 +200,7 @@ abstract class AbstractRepository implements RepositoryInterface
         
         // if we made it all the way here, then this property is empty.
         // regardless of the exact nature of its emptiness (e.g. NULL
-        // vs. ''), we'll reset it's value to its default.
+        // vs. ''), we'll reset its value to its default.
         
         $this->{$property} = $default;
       }
@@ -214,40 +213,25 @@ abstract class AbstractRepository implements RepositoryInterface
    * Returns an array mapping property names to their default value
    *
    * @return array
-   * @noinspection PhpRedundantCatchClauseInspection
    */
   private function getPropertyDefaults(): array
   {
-    try {
-      
-      // we should always be able to reflect $this because the class is
-      // already loaded or we wouldn't be here.  but, because we might
-      // throw an exception, we'll wrap ths following return statement in
-      // a try/catch block.
-      
-      $defaults = (new ReflectionClass(static::class))->getDefaultProperties();
-      $defaults = array_merge($defaults, $this->getCustomPropertyDefaults());
-      
-      // finally, we want to make sure that our list of defaults (a)
-      // doesn't include the __properties property and (b) it only
-      // includes properties that are in the __properties array.  we also
-      // remove any that don't have a default value while we're filtering.
-      
-      return array_filter($defaults,
-        function ($default, string $property): bool {
-          return $this->notEmpty($default) !== 0             // has a default
-            && $property !== '__properties'                // isn't __properties
-            && in_array($property, $this->__properties);   // is in __properties
-        },
-        ARRAY_FILTER_USE_BOTH);
-    } catch (ReflectionException $e) {
-      
-      // in the vanishingly unlikely chance that we end up here, we'll
-      // just return an empty array.  no properties will have their value
-      // set to the default, but that's okay.
-      
-      return [];
-    }
+    $defaults = (new ReflectionClass(static::class))->getDefaultProperties();
+    $defaults = array_merge($defaults, $this->getCustomPropertyDefaults());
+    
+    // finally, we want to make sure that our list of defaults (a)
+    // doesn't include the __properties property and (b) it only
+    // includes properties that are in the __properties array.  we also
+    // remove any that don't have a default value while we're filtering.
+    
+    return array_filter($defaults,
+      function ($default, string $property): bool {
+        return $this->notEmpty($default)                 // has a default
+          && $property !== '__properties'                // isn't __properties
+          && in_array($property, $this->__properties);   // is in __properties
+      },
+      ARRAY_FILTER_USE_BOTH);
+  
   }
   
   /**
@@ -315,7 +299,7 @@ abstract class AbstractRepository implements RepositoryInterface
    * __get()
    *
    * Given the name of a property, if it's in the $__properties property,
-   * return it's value.
+   * return its value.
    *
    * @param string $property
    *
@@ -362,6 +346,7 @@ abstract class AbstractRepository implements RepositoryInterface
    * associative array mapping property name to value.
    *
    * @return array
+   * @throws RepositoryException
    */
   public function toArray(): array
   {
@@ -381,6 +366,7 @@ abstract class AbstractRepository implements RepositoryInterface
    * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
    *
    * @return array
+   * @throws RepositoryException
    */
   public function jsonSerialize(): array
   {
@@ -389,7 +375,7 @@ abstract class AbstractRepository implements RepositoryInterface
     // to an array, and then, we return them.
     
     foreach ($this->__properties as $property) {
-      $jsonData[$property] = $this->{$property};
+      $jsonData[$property] = $this->__get($property);
     }
     
     return $jsonData ?? [];
