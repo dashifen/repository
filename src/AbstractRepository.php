@@ -65,7 +65,7 @@ abstract class AbstractRepository implements RepositoryInterface
    *
    * @return void
    */
-  private function initializeProperties()
+  private function initializeProperties(): void
   {
     
     // first, we get a list of our property names.  then, we get a list of
@@ -97,7 +97,7 @@ abstract class AbstractRepository implements RepositoryInterface
     
     try {
       $reflection = new ReflectionClass(static::class);
-    } catch (ReflectionException $e) {
+    } catch (ReflectionException) {
       
       // this shouldn't happen since we're reflecting our own object, but
       // if it ever does, there's nothing we can do but die.
@@ -390,7 +390,7 @@ abstract class AbstractRepository implements RepositoryInterface
    *
    * @return mixed
    */
-  public function current()
+  public function current(): mixed
   {
     return $this->{current($this->__properties)};
   }

@@ -16,7 +16,7 @@ There are two ways to go here:
 2. Extend the `Repository` object.
 
 If you extend the abstract object, you'll be forced to implement three methods:  
-1. getHiddenPropertyNames - returns an array of properties that should remain inaccessable via the arrow operator,
+1. getHiddenPropertyNames - returns an array of properties that should remain inaccessible via the arrow operator,
 2. getCustomPropertyDefaults - sets more complex default values than can be set during property declaration,
 3. getRequiredProperties - returns a list of properties that must have values after object instantiation. 
 
@@ -38,7 +38,7 @@ Getters must be in the form of `"get" . ucfirst($propertyName)`.  So, the `start
 
 Repositories do not implement `__set()`, so you have to write them yourself.  By default, the `AbstractRepository` object will use setters within it's `__construct()` method.  So, if you extend that object, you must create a setter for each of your properties that are expected to be used by that constructor, _i.e._ those properties referenced by the constructor's array parameter.
 
-Like getters, they must be in the format of `"set" . ucfirst($propertyName)`.  Thus, the setter for `startDate` must be `setStartDate()`.  If you implement setters, they will be called from the Repository's constructor when it iterates over it's array argument.  Because they're called from the constructor, they can be protected or private to create an object with read-only properties after construction.
+Like getters, they must be in the format of `"set" . ucfirst($propertyName)`.  Thus, the setter for `startDate` must be `setStartDate()`.  If you implement setters, they will be called from the Repository's constructor when it iterates over its array argument.  Because they're called from the constructor, they can be protected or private to create an object with read-only properties after construction.
 
 ### Example
 
