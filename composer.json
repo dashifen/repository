@@ -1,7 +1,7 @@
 {
   "name": "dashifen/repository",
-  "description": "An object with read-only protected properties from which other objects can be extended.",
-  "license": "MIT",
+  "description": "An object with read-only protected properties from which other objects can be extened.",
+  "license": "WTFPL",
   "type": "library",
   "authors": [
     {
@@ -17,7 +17,8 @@
   },
   "minimum-stability": "stable",
   "require": {
-    "php": ">=8.2",
+    "php": ">=7.4",
+    "ext-json": "*",
     "dashifen/case-changing-trait": "^1",
     "dashifen/exception": "^1"
   }
