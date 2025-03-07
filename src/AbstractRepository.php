@@ -139,6 +139,7 @@ abstract class AbstractRepository implements RepositoryInterface
    */
   protected function setPropertyValues(array $data): void
   {
+    $problems = [];
     foreach ($data as $property => $value) {
       
       // if our $property doesn't exist as-is, we'll try converting it from a
@@ -161,25 +162,30 @@ abstract class AbstractRepository implements RepositoryInterface
           $this->{$setter}($value);
         } else {
           
-          // if we find a property without a setter, we're going to throw an
-          // exception.  children can always modify this behavior if it's a
-          // problem.  or, apps can catch and ignore them.  regardless, it
-          // seems worthwhile to inform someone that they've probably forgotten
-          // to write a method.
+          // if we find a property without a setter, we add it to our list
+          // of problems.  we'll throw these later, but if we did it now, as
+          // prior versions of this object did, we wouldn't proceed with the
+          // loop.
           
-          throw new RepositoryException("Setter missing: $setter.",
-            RepositoryException::UNKNOWN_SETTER);
+          $problems[] = "Setter missing: $setter.";
         }
       } else {
         
         // similarly, if we receive data for which we do not have a
-        // property, then we'll throw a different exception.  same
-        // reasoning applies:  this could be a problem, and only the
-        // programmer of the app using this object will know.
+        // property, we'll also add that to our list of problems.
         
-        throw new RepositoryException("Unknown property: $property.",
-          RepositoryException::UNKNOWN_PROPERTY);
+        $problems[] = "Unknown property: $property.";
       }
+    }
+    
+    if (sizeof($problems) > 0) {
+      
+      // if we ran into problems above, we'll throw them here.  this way, a
+      // dev can catch this Exception and handle things or just let it produce
+      // an error that the fix the old-fashioned way.
+      
+      throw new RepositoryException(print_r($problems, true),
+        RepositoryException::UNKNOWN_PROPERTY);
     }
   }
   

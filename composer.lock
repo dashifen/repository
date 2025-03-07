@@ -49,16 +49,16 @@
         },
         {
             "name": "dashifen/exception",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dashifen/exception.git",
-                "reference": "e795e1d973e9f781eb3a8371b6299c852eef9bc1"
+                "reference": "b57568029d4a99a4c875d6f96220739ccda8eec1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dashifen/exception/zipball/e795e1d973e9f781eb3a8371b6299c852eef9bc1",
-                "reference": "e795e1d973e9f781eb3a8371b6299c852eef9bc1",
+                "url": "https://api.github.com/repos/dashifen/exception/zipball/b57568029d4a99a4c875d6f96220739ccda8eec1",
+                "reference": "b57568029d4a99a4c875d6f96220739ccda8eec1",
                 "shasum": ""
             },
             "require": {
@@ -85,21 +85,21 @@
             "description": "a base class for exceptions in Dashifen's other work",
             "support": {
                 "issues": "https://github.com/dashifen/exception/issues",
-                "source": "https://github.com/dashifen/exception/tree/1.2.0"
+                "source": "https://github.com/dashifen/exception/tree/1.2.1"
             },
-            "time": "2019-12-12T14:26:49+00:00"
+            "time": "2025-01-02T17:24:05+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.4",
         "ext-json": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
